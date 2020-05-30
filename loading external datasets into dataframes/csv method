@@ -1,0 +1,13 @@
+val df = spark.read.options(Map("header" -> "true",
+      "inferSchema" -> "true",
+      "nullValue" -> "NA",
+      "timestampFormat" -> "yyyy-MM-dd'T'HH:mm:ss",
+      "mode" -> "FAILFAST"
+      )).csv("/home/harsh/Desktop/sample data/mental-health-in-tech-survey/survey.csv")
+
+df.show
+df.select("Age").show
+ df.select("Timestamp","Age","remote_work","leave").filter("Age>30").show
+df.rdd.getNumPartitions
+df.printSchema
+

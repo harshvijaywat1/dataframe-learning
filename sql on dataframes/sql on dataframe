@@ -1,0 +1,64 @@
+import org.apache.spark.sql.types._
+val surveySchema = StructType(
+  Array(
+    StructField("timestamp", TimestampType, true),
+    StructField("age", LongType, true),
+    StructField("gender", StringType, true),
+    StructField("country", StringType, true),
+    StructField("state", StringType, true),
+    StructField("self_employed", StringType, true),
+    StructField("family_history", StringType, true),
+    StructField("treatment", StringType, true),
+    StructField("work_interfere", StringType, true),
+    StructField("no_employees", StringType, true),
+    StructField("remote_work", StringType, true),
+    StructField("tech_company", StringType, true),
+    StructField("benefits", StringType, true),
+    StructField("care_options", StringType, true),
+    StructField("wellness_program", StringType, true),
+    StructField("seek_help", StringType, true),
+    StructField("anonymity", StringType, true),
+    StructField("leave", StringType, true),
+    StructField("mental_health_consequence", StringType, true),
+    StructField("phys_health_consequence", StringType, true),
+    StructField("coworkers", StringType, true),
+    StructField("supervisor", StringType, true),
+    StructField("mental_health_interview", StringType, true),
+    StructField("phys_health_interview", StringType, true),
+    StructField("mental_vs_physical", StringType, true),
+    StructField("obs_consequence", StringType, true),
+    StructField("comments", StringType, true)
+  )
+)
+
+val df = spark.read.format("csv")
+                   .schema(surveySchema)
+                   .option("header", "true")
+                   .option("timestampFormat", "yyyy-MM-dd'T'HH:mm:ss")
+                   .option("nullValue", "NA")
+                   .option("mode", "PERMISSIVE")
+                   .load("/home/harsh/Desktop/sample data/mental-health-in-tech-survey/survey.csv")                  
+
+df.createOrReplaceTempView("survey")
+spark.catalog.listTables.show
+
+spark.sql(""" select Timestamp, age, remote_work, leave
+       from survey
+      where age>30""").show
+
+spark.sql("""select gender, sum(yes), sum(no) 
+            from (select case when lower(trim(gender)) in ('male','m','male-ish','maile','mal',
+                                                           'male (cis)','make','male ','man','msle',
+                                                           'mail','malr','cis man','cis male') 
+                              then 'Male' 
+                              when lower(trim(gender)) in ('cis female','f','female','woman',
+                                                           'female','female ','cis-female/femme',
+                                                           'female (cis)','femail') 
+                              then 'Female'
+                              else 'Transgender' 
+                              end as gender,
+                              case when treatment == 'Yes' then 1 else 0 end as yes,
+                              case when treatment == 'No' then 1 else 0 end as no
+                  from survey) 
+         where gender != 'Transgender'
+         group by gender""").show        

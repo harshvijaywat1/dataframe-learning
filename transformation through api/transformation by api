@@ -1,0 +1,38 @@
+val df2 = spark.read.
+                    format("csv")
+                    .option("header","true")
+                    .option("inferSchema","true")
+                    .option("timestampFormat","yyyy-MM-dd'T'HH:mm;ss")
+                    .option("nullValue", "NA")
+                    .option("mode", "FAILFAST")
+                    .load("/home/harsh/Desktop/sample data/mental-health-in-tech-survey/survey.csv") 
+
+val df1 = df2.select("Gender", "treatment")
+
+val df = df1.select($"Gender", 
+      (when($"treatment"==="Yes",1).otherwise(0)).alias("All-Yes"),
+      (when($"treatment"==="No",1).otherwise(0)).alias("All-No"))
+
+df.show
+
+df.collect
+
+val df3 = df.groupBy("Gender").agg(sum($"All-Yes"), sum($"All-No"))
+
+df3.show
+
+def parseGender(g: String)={
+    g.toLowerCase match{
+    case "male"|"m"|"male-ish"|"maile"|"mal"|"male (cis)"|"make"|"male "|"man"|"msle"|"mail"|"malr"|"Cis man"|"cis male"  => "Male"
+    case "female"|"f"|"cis female"|"woman"|"femake"|"cis-female"|"femail" => "Female"
+    case _ => "Transgender"
+    }
+    }
+ 
+val parseGenderUDF = udf(parseGender _)      
+val df3 = df.select((parseGenderUDF($"Gender")).alias("Gender"), $"All-Yes", $"All-No") 
+val df4 = df3.groupBy("Gender").agg(sum($"All-Yes"), sum($"All-No"))
+df4.show
+
+val df5 = df4.filter($"Gender" =!= "Transgender")
+df5.collect

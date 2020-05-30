@@ -1,0 +1,20 @@
+import org.apache.spark.sql.types._
+import org.apache.spark.sql.Row
+import org.apache.spark.storage.StorageLevel
+import org.apache.spark.util.IntParam
+import scala.io.Source
+import scala.collection.mutable.HashMap
+import java.io.File
+import scala.collection.mutable.ListBuffer
+
+val Employee = Seq( Row("Mike", "Robert", "Mike09@gmail.com", 10000),
+                    Row("John", "Milers", "John09@gmail.com", 20000)
+                    )
+val schema = StructType(Array(StructField("FirstName", StringType, true),
+                              StructField("LastName", StringType, true),
+                              StructField("EMail", StringType, true),
+                              StructField("Salary", IntegerType, true)))
+
+val EmpDF = spark.createDataFrame(spark.sparkContext.parallelize(Employee), schema)
+EmpDF.show
+         

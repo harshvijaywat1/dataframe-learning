@@ -1,0 +1,8 @@
+val GOTdf = spark.read.options(Map("header" -> "true", "inferSchema" -> "true")).csv("/home/harsh/Desktop/dataframes/GOT example/data/character-deaths.csv")
+val GOTbattlesdf = spark.read.options(Map("header" -> "true", "inferSchema" -> "true")).csv("/home/harsh/Desktop/dataframes/GOT example/data/battles.csv")
+GOTdf.createOrReplaceTempView("character_death")
+GOTbattlesdf.createOrReplaceTempView("battles")
+spark.catalog.listTables.show
+spark.sql("""select attacker_1, count(distinct(' ')) from battles group by attacker_1""").show
+spark.sql("""select battle_type, count(' ') from battles group by battle_type""").show
+

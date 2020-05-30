@@ -1,0 +1,8 @@
+val Fifadf = spark.read.options(Map("header" -> "true", "inferSchema" -> "true")).csv("/home/harsh/Desktop/dataframes/fifa example/data/Fifa19.csv")
+Fifadf.printSchema
+Fifadf.count
+Fifadf.columns.foreach(println)
+Fifadf.describe("Value").show
+Fifadf.select("Name", "Nationality").show
+Fifadf.select("ID", "Name", "Age", "Nationality","Potential", "Jersey Number", "Club").filter("Age<30").show
+
